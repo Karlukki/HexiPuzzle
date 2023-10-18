@@ -1,7 +1,8 @@
 import pygame
 from grids.src.updown_tri import *
 
-hexiamond = {(0, 0, 1), (1, 0, 1), (1, 0, 0), (2, 0, 0), (0, 0, 2), (1, 1, 0)}
+hexiamonds = [{(0, 0, 1), (1, 0, 1), (1, 0, 0), (2, 0, 0), (0, 0, 2), (1, 1, 0)},
+            {(0, 0, 1), (1, 0, 1), (1, 0, 0), (1, 1, 0), (0, 1, 1), (2, 0, 0)}]
 
 
 def getHexiamondCoordinates(hexiamond, origin_x, origin_y):
@@ -12,7 +13,12 @@ def getHexiamondCoordinates(hexiamond, origin_x, origin_y):
     return hexiamond_coordinates
 
 
-hexiamond_cartesian = getHexiamondCoordinates(hexiamond, 300, 300)
+hexiamonds_cartesian = []
+location = 300
+for hex in hexiamonds:
+    hexiamonds_cartesian.append(getHexiamondCoordinates(hex, location, 300))
+    location += 200
+
 
 pygame.init()
 
@@ -41,10 +47,11 @@ def point_in_triangle(pt, triangle):
 
 run = True
 while run:
-    screen.fill('white')
-    for triangle in hexiamond_cartesian:
-        pygame.draw.polygon(screen, 'red', triangle)
-        pygame.draw.polygon(screen, 'black', triangle, 3)
+    screen.fill('black')
+    for hex in hexiamonds_cartesian:
+        for triangle in hex:
+            pygame.draw.polygon(screen, 'red', triangle)
+            pygame.draw.polygon(screen, 'white', triangle, 3)
 
 
 
