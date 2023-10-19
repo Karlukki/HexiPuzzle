@@ -61,7 +61,7 @@ def point_in_triangle(pt, triangle):
 
     return b1 == b2 == b3
 
-
+active_hex = None
 run = True
 while run:
     screen.fill('black')
@@ -70,30 +70,34 @@ while run:
             pygame.draw.polygon(screen, 'green', triangle)
             pygame.draw.polygon(screen, 'white', triangle, 3)
 
-
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-    #     if event.type == pygame.MOUSEBUTTONDOWN:
-    #         if event.button == 1:
-    #             for num, tri in enumerate(triangles):
-    #                 if point_in_triangle(event.pos, tri):
-    #                     active_tri = num
-    #
-    #     if event.type == pygame.MOUSEBUTTONUP:
-    #         if event.button == 1:
-    #             active_tri = None
-    #
-    #     if event.type == pygame.MOUSEMOTION:
-    #         if active_tri != None:
-    #             dx, dy = event.rel
-    #             triangles[active_tri] = [(x + dx, y + dy) for x, y in triangles[active_tri]]
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                for num, hex in enumerate(hexiamonds_cartesian):
+                    for tri in hex:
+                        if point_in_triangle(event.pos, tri):
+                            active_hex = num
+                            break
+
+        if event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1:
+                active_hex = None
+
+        if event.type == pygame.MOUSEMOTION:
+            if active_hex != None:
+                dx, dy = event.rel
+                for num, tri in enumerate(hexiamonds_cartesian[active_hex]):
+                    hexiamonds_cartesian[active_hex][num] = [(x + dx, y + dy) for x, y in tri]
     #
 
-    # if (active_tri is not None):
-    #     pygame.draw.polygon(screen, 'red', triangles[active_tri])
-    #
+    # if (active_hex is not None):
+    #     for triangle in hexiamonds_cartesian[active_hex]:
+    #         pygame.draw.polygon(screen, 'green', triangle)
+    #         pygame.draw.polygon(screen, 'red', triangle, 3)
+
     pygame.display.flip()
 
 pygame.quit()
