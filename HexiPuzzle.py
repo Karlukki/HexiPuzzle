@@ -1,9 +1,21 @@
 import pygame
 from grids.src.updown_tri import *
 
-hexiamonds = [{(0, 0, 1), (1, 0, 1), (1, 0, 0), (2, 0, 0), (0, 0, 2), (1, 1, 0)},
-            {(0, 0, 1), (1, 0, 1), (1, 0, 0), (1, 1, 0), (0, 1, 1), (2, 0, 0)}]
+hexiamonds = [
+    {(0, 2, 0), (0, 1, 0), (0, 1, 1), (1, 1, 0), (0, 0, 1), (1, 0, 0)}, #A
+    {(-1, 2, 1), (-1, 1, 1), (0, 1, 1), (0, 1, 0), (0, 0, 1), (1, 0, 1)},#E
+    {(0, 1, 1), (0, 1, 0), (1, 1, 0), (0, 0, 2), (0, 0, 1), (1, 0, 1)},#F
+    {(0, 2, 0), (0, 1, 0), (0, 1, 1), (-1, 1, 1), (0, 0, 1), (1, 0, 1)},#H
+    {(-1, 2, 0), (0, 2, 0), (0, 1, 0), (1, 1, 0), (1, 0, 0), (2, 0, 0)},#I
+    {(-1, 2, 1), (-1, 1, 1), (0, 1, 1), (0, 0, 1), (1, 0, 1), (1, 0, 0)},#L
 
+    {(0, 0, 1), (1, 0, 1), (1, 0, 0), (1, 1, 0), (0, 1, 0), (0, 1, 1)},#O
+    {(-1, 1, 1), (0, 1, 1), (0, 1, 0), (0, 0, 1), (1, 0, 1), (1, -1, 1)},#P
+    {(0, 1, 0), (0, 1, 1), (0, 0, 1), (1, 0, 1), (1, -1, 1), (1, -1, 2)},#S
+    {(-1, 1, 1), (0, 1, 1), (0, 0, 1), (1, 0, 1), (1, 0, 0), (1, 1, 0)},#U
+    {(-1, 1, 1), (0, 1, 1), (0, 0, 1), (1, 0, 1), (1, 0, 0), (2, 0, 0)},#V
+    {(0, 1, 0), (1, 1, 0), (1, 1, -1), (1, 0, 1), (1, 0, 0), (2, 0, 0)},#X
+]
 
 def getHexiamondCoordinates(hexiamond, origin_x, origin_y):
     hexiamond_coordinates = []
@@ -14,10 +26,15 @@ def getHexiamondCoordinates(hexiamond, origin_x, origin_y):
 
 
 hexiamonds_cartesian = []
-location = 300
+location_x = 100
+location_y = 200
 for hex in hexiamonds:
-    hexiamonds_cartesian.append(getHexiamondCoordinates(hex, location, 300))
-    location += 200
+    if (location_x > 900):
+        location_x = 100
+        location_y = 400
+    hexiamonds_cartesian.append(getHexiamondCoordinates(hex, location_x, location_y))
+    location_x += 150
+
 
 
 pygame.init()
