@@ -1,7 +1,7 @@
 import pygame
 from grids.src.updown_tri import *
 
-hexiamonds = [
+tri_grid_coords = [
     {(0, 2, 0), (0, 1, 0), (0, 1, 1), (1, 1, 0), (0, 0, 1), (1, 0, 0)}, #A
     {(-1, 2, 1), (-1, 1, 1), (0, 1, 1), (0, 1, 0), (0, 0, 1), (1, 0, 1)},#E
     {(0, 1, 1), (0, 1, 0), (1, 1, 0), (0, 0, 2), (0, 0, 1), (1, 0, 1)},#F
@@ -17,24 +17,31 @@ hexiamonds = [
     {(0, 1, 0), (1, 1, 0), (1, 1, -1), (1, 0, 1), (1, 0, 0), (2, 0, 0)},#X
 ]
 
-def getHexiamondCoordinates(hexiamond, origin_x, origin_y):
+
+hexiamonds = []
+origin_x = 100
+origin_y = 200
+for hex in tri_grid_coords:
+    hex_dict = {}
+    if origin_x > 900:
+        origin_x = 100
+        origin_y = 400
+
+    hex_dict['triangles'] = hex
+    hex_dict['origin'] = tuple((origin_x, origin_y))
+    hex_dict['rotation'] = 0
+    hexiamonds.append(hex_dict)
+    origin_x += 150
+
+def calculateCoords(hexiamond):
+    origin = hexiamond['origin']
+    rotation = hexiamond['rotation']
     hexiamond_coordinates = []
-    for triangle in hexiamond:
-        cartesian_relative = (tri_corners(triangle[0], triangle[1], triangle[2]))
-        hexiamond_coordinates.append(tuple((x + origin_x, -y + origin_y) for x, y in cartesian_relative))
+    for tri in hexiamond['triangles']:
+        cartesian_relative = (tri_corners(tri[0], tri[1], tri[2]))
+        hexiamond_coordinates.append(tuple((origin[0] + x, origin[1] - y) for x, y in cartesian_relative)) #position
+        #rotation
     return hexiamond_coordinates
-
-
-hexiamonds_cartesian = []
-location_x = 100
-location_y = 200
-for hex in hexiamonds:
-    if (location_x > 900):
-        location_x = 100
-        location_y = 400
-    hexiamonds_cartesian.append(getHexiamondCoordinates(hex, location_x, location_y))
-    location_x += 150
-
 
 
 pygame.init()
@@ -45,7 +52,6 @@ SCREEN_HEIGHT = 600
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('HexiPuzzle')
-
 
 
 # Function to check if a point is inside a triangle
@@ -64,16 +70,17 @@ def point_in_triangle(pt, triangle):
 active_hex = None
 hex_colors = ['deeppink', 'darkgoldenrod1', 'purple', 'cyan2', 'darkgreen', 'yellow', 'cornflowerblue', 'darkorange1', 'lime', 'bisque', 'darkolivegreen4', 'indianred1']
 hex_colors_index = 0
+
 run = True
 while run:
     screen.fill('black')
-    for hex in hexiamonds_cartesian:
-        for triangle in hex:
+    for hex in hexiamonds:
+        for tri in calculateCoords(hex):
             if hex_colors_index > 11:
                 hex_colors_index = 0
 
-            pygame.draw.polygon(screen, hex_colors[hex_colors_index], triangle)
-            pygame.draw.polygon(screen, 'white', triangle, 3)
+            pygame.draw.polygon(screen, hex_colors[hex_colors_index], tri)
+            pygame.draw.polygon(screen, 'white', tri, 3)
         hex_colors_index += 1
 
 
@@ -83,8 +90,8 @@ while run:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                for num, hex in enumerate(hexiamonds_cartesian):
-                    for tri in hex:
+                for num, hex in enumerate(hexiamonds):
+                    for tri in calculateCoords(hex):
                         if point_in_triangle(event.pos, tri):
                             active_hex = num
                             break
@@ -96,14 +103,10 @@ while run:
         if event.type == pygame.MOUSEMOTION:
             if active_hex != None:
                 dx, dy = event.rel
-                for num, tri in enumerate(hexiamonds_cartesian[active_hex]):
-                    hexiamonds_cartesian[active_hex][num] = [(x + dx, y + dy) for x, y in tri]
-    #
+                current_origin = hexiamonds[active_hex]['origin']
+                new_origin = (current_origin[0] + dx, current_origin[1] + dy)
+                hexiamonds[active_hex]['origin'] = new_origin
 
-    # if (active_hex is not None):
-    #     for triangle in hexiamonds_cartesian[active_hex]:
-    #         pygame.draw.polygon(screen, 'green', triangle)
-    #         pygame.draw.polygon(screen, 'red', triangle, 3)
 
     pygame.display.flip()
 
