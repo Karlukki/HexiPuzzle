@@ -67,7 +67,7 @@ while run:
     screen.fill('black')
     for hex in hexiamonds_cartesian:
         for triangle in hex:
-            pygame.draw.polygon(screen, 'blue', triangle)
+            pygame.draw.polygon(screen, 'green', triangle)
             pygame.draw.polygon(screen, 'white', triangle, 3)
 
 
