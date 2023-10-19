@@ -73,14 +73,14 @@ hex_colors_index = 0
 
 run = True
 while run:
-    screen.fill('black')
+    screen.fill('burlywood3')
     for hex in hexiamonds:
         for tri in calculateCoords(hex):
             if hex_colors_index > 11:
                 hex_colors_index = 0
 
             pygame.draw.polygon(screen, hex_colors[hex_colors_index], tri)
-            pygame.draw.polygon(screen, 'white', tri, 3)
+            pygame.draw.polygon(screen, 'black', tri, 3)
         hex_colors_index += 1
 
 
@@ -104,8 +104,10 @@ while run:
             if active_hex != None:
                 dx, dy = event.rel
                 current_origin = hexiamonds[active_hex]['origin']
-                new_origin = (current_origin[0] + dx, current_origin[1] + dy)
-                hexiamonds[active_hex]['origin'] = new_origin
+
+                new_x = max(0, min(current_origin[0] + dx, SCREEN_WIDTH))
+                new_y = max(0, min(current_origin[1] + dy, SCREEN_HEIGHT))
+                hexiamonds[active_hex]['origin'] = (new_x, new_y)
 
 
     pygame.display.flip()
