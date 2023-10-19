@@ -62,13 +62,20 @@ def point_in_triangle(pt, triangle):
     return b1 == b2 == b3
 
 active_hex = None
+hex_colors = ['deeppink', 'darkgoldenrod1', 'purple', 'cyan2', 'darkgreen', 'yellow', 'cornflowerblue', 'darkorange1', 'lime', 'bisque', 'darkolivegreen4', 'indianred1']
+hex_colors_index = 0
 run = True
 while run:
     screen.fill('black')
     for hex in hexiamonds_cartesian:
         for triangle in hex:
-            pygame.draw.polygon(screen, 'green', triangle)
+            if hex_colors_index > 11:
+                hex_colors_index = 0
+
+            pygame.draw.polygon(screen, hex_colors[hex_colors_index], triangle)
             pygame.draw.polygon(screen, 'white', triangle, 3)
+        hex_colors_index += 1
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
