@@ -1,4 +1,4 @@
-import pygame
+import pygame as pg
 from grids.src.updown_tri import *
 
 tri_grid_coords = [
@@ -44,14 +44,14 @@ def calculateCoords(hexiamond):
     return hexiamond_coordinates
 
 
-pygame.init()
+pg.init()
 
 # game window
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 600
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption('HexiPuzzle')
+screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pg.display.set_caption('HexiPuzzle')
 
 
 # Function to check if a point is inside a triangle
@@ -69,15 +69,57 @@ def point_in_triangle(pt, triangle):
 
 loading_progress = 0
 def draw_loading_line():
-    pygame.draw.line(screen, 'black', (0, 0), (loading_progress, 0), 5)
+    pg.draw.line(screen, 'black', (0, 0), (loading_progress, 0), 5)
 
+
+class DropDown:
+    def __init__(self, x, y, w, h, options):
+        self.rect = pg.Rect(x, y, w, h)
+        self.options = options
+        self.selected_option = None
+        self.draw_menu = False
+
+    def draw(self, screen, font):
+        # Draw the dropdown box
+        pg.draw.rect(screen, 'lightgray' if not self.draw_menu else 'gray', self.rect)
+
+        # Draw the selected option or placeholder text
+        if self.selected_option is not None:
+            text = font.render(self.selected_option, True, 'black')
+        else:
+            text = font.render("Select Difficulty", True, 'black')
+        text_rect = text.get_rect(center=self.rect.center)
+        screen.blit(text, text_rect)
+
+        # Draw the dropdown options if the menu is open
+        if self.draw_menu:
+            for i, option in enumerate(self.options):
+                option_rect = pg.Rect(self.rect.x, self.rect.y + self.rect.height + 5 + i * 30, self.rect.width, 30)
+                pg.draw.rect(screen, 'lightgray', option_rect)
+                option_text = font.render(option, True, 'black')
+                option_text_rect = option_text.get_rect(center=option_rect.center)
+                screen.blit(option_text, option_text_rect)
+
+    def handle_event(self, event):
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                if self.rect.collidepoint(event.pos):
+                    self.draw_menu = not self.draw_menu
+                elif self.draw_menu:
+                    for i, option in enumerate(self.options):
+                        option_rect = pg.Rect(self.rect.x, self.rect.y + self.rect.height + 5 + i * 30, self.rect.width,
+                                              30)
+                        if option_rect.collidepoint(event.pos):
+                            self.selected_option = option
+                            self.draw_menu = False
 
 def draw_start_screen():
     screen.fill('burlywood3')
-
-    start_button_rect = pygame.Rect(400, 300, 200, 50)
-    pygame.draw.rect(screen, 'orange', start_button_rect)
-    font = pygame.font.Font(None, 36)
+    dropdown = DropDown(400, 400, 200, 30, ["Easy", "Medium", "Hard"])
+    start_button_rect = pg.Rect(400, 300, 200, 50)
+    pg.draw.rect(screen, 'grey', dropdown)
+    pg.draw.rect(screen, 'orange', start_button_rect)
+    font = pg.font.Font(None, 36)
     text = font.render("START", True, 'black')
     text_rect = text.get_rect(center=start_button_rect.center)
     screen.blit(text, text_rect)
@@ -87,13 +129,14 @@ hex_colors = ['deeppink', 'darkgoldenrod1', 'purple', 'cyan2', 'darkgreen', 'yel
               'darkorange1', 'lime', 'bisque', 'darkolivegreen4', 'indianred1']
 hex_colors_index = 0
 
+
 def draw_game_screen():
     global hex_colors_index  # Declare hex_colors_index as a global variable
     screen.fill('burlywood3')
     for hex in hexiamonds:
         for tri in calculateCoords(hex):
-            pygame.draw.polygon(screen, hex_colors[hex_colors_index], tri)
-            pygame.draw.polygon(screen, 'black', tri, 3)
+            pg.draw.polygon(screen, hex_colors[hex_colors_index], tri)
+            pg.draw.polygon(screen, 'black', tri, 3)
         hex_colors_index = (hex_colors_index + 1) % len(hex_colors)
 
 
@@ -104,14 +147,14 @@ current_screen = 'start'
 
 run = True
 while run:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
             run = False
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pg.MOUSEBUTTONDOWN:
             if event.button == 1:
                 if current_screen == 'start':
-                    start_button_rect = pygame.Rect(400, 300, 200, 50)
+                    start_button_rect = pg.Rect(400, 300, 200, 50)
                     if start_button_rect.collidepoint(event.pos):
                         current_screen = 'loading'
                 elif current_screen == 'game':
@@ -121,11 +164,11 @@ while run:
                                 active_hex = num
                                 break
 
-        if event.type == pygame.MOUSEBUTTONUP:
+        if event.type == pg.MOUSEBUTTONUP:
             if event.button == 1:
                 active_hex = None
 
-        if event.type == pygame.MOUSEMOTION:
+        if event.type == pg.MOUSEMOTION:
             if current_screen == 'game' and active_hex is not None:
                 dx, dy = event.rel
                 current_origin = hexiamonds[active_hex]['origin']
@@ -143,6 +186,6 @@ while run:
     elif current_screen == 'game':
         draw_game_screen()
 
-    pygame.display.flip()
+    pg.display.flip()
 
-pygame.quit()
+pg.quit()
