@@ -72,11 +72,9 @@ while run:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 #hexiamond picked up with cursor
                 if event.button == 1:
-                    indices = list(range(len(hexiamonds)))
-                    for num in reversed(indices):
-                        hex = hexiamonds[num]
+                    for hex in reversed(hexiamonds):
                         if hex.point_in(event.pos):
-                            active_hex = num
+                            active_hex = hex
                             break
 
                 #hexiamond is rotated
@@ -92,21 +90,23 @@ while run:
             #hexiamond is dropped
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
+                    # if (active_hex):
+                    #     active_hex.snap()
                     active_hex = None
 
             #hexiamond is dragged
             if event.type == pygame.MOUSEMOTION:
                 if active_hex is not None:
                     dx, dy = event.rel
-                    current_origin = hexiamonds[active_hex].origin
+                    current_origin = active_hex.origin
                     new_x = max(0, min(current_origin[0] + dx, SCREEN_WIDTH))
                     new_y = max(0, min(current_origin[1] + dy, SCREEN_HEIGHT))
-                    hexiamonds[active_hex].origin = (new_x, new_y)
+                    active_hex.origin = (new_x, new_y)
 
             #hexiamond is mirrored
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 if active_hex is not None:
-                    hexiamonds[active_hex].mirror = not hexiamonds[active_hex].mirror
+                    active_hex.mirror = not active_hex.mirror
                 else:
                     for hex in reversed(hexiamonds):
                         if hex.point_in(pygame.mouse.get_pos()):
