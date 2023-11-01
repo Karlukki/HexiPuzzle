@@ -30,9 +30,7 @@ def draw_start_screen():
     screen.blit(text, text_rect)
 
 active_hex = None
-hex_colors = ['deeppink', 'darkgoldenrod1', 'purple', 'cyan2', 'darkgreen', 'yellow', 'cornflowerblue',
-              'darkorange1', 'lime', 'bisque', 'darkolivegreen4', 'indianred1']
-hex_colors_index = 0
+
 
 def draw_game_screen():
     global hex_colors_index
@@ -45,9 +43,8 @@ def draw_game_screen():
     #draw hexiamonds
     for hex in hexiamonds:
         for tri in hex.to_cartesian():
-            pygame.draw.polygon(screen, hex_colors[hex_colors_index], tri)
+            pygame.draw.polygon(screen, hex.color, tri)
             pygame.draw.polygon(screen, 'black', tri, 3)
-        hex_colors_index = (hex_colors_index + 1) % len(hex_colors)
 
 
 current_screen = 'start'
@@ -75,6 +72,8 @@ while run:
                     for hex in reversed(hexiamonds):
                         if hex.point_in(event.pos):
                             active_hex = hex
+                            hexiamonds.remove(active_hex)
+                            hexiamonds.append(active_hex)
                             break
 
                 #hexiamond is rotated

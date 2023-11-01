@@ -1,6 +1,10 @@
 '''Hexiamond generation, transformations and helper functions '''
 from grids.src.updown_tri import *
 
+
+hex_colors = ['deeppink', 'darkgoldenrod1', 'purple', 'cyan2', 'darkgreen', 'yellow', 'cornflowerblue',
+              'darkorange1', 'lime', 'bisque', 'darkolivegreen4', 'indianred1']
+
 # Hexiamonds in triangular grid representation
 hexiamonds_tri_grid = [
     {(0, 2, 0), (0, 1, 0), (0, 1, 1), (1, 1, 0), (0, 0, 1), (1, 0, 0)}, #A
@@ -17,9 +21,9 @@ hexiamonds_tri_grid = [
     {(-1, 1, 1), (0, 1, 1), (0, 0, 1), (1, 0, 1), (1, 0, 0), (2, 0, 0)},#V
     {(0, 1, 0), (1, 1, 0), (1, 1, -1), (1, 0, 1), (1, 0, 0), (2, 0, 0)},#X
 ]
-
 class Hexiamond:
-    def __init__(self, hex_tri_grid, origin_x, origin_y):
+    def __init__(self, color, hex_tri_grid, origin_x, origin_y):
+        self.color = color
         self.triangles = hex_tri_grid
         self.origin = tuple((origin_x, origin_y))
         self.rotation = 0
@@ -61,9 +65,9 @@ class Hexiamond:
 hexiamonds = []
 origin_x = 100
 origin_y = 200
-for hex_tri_grid in hexiamonds_tri_grid:
+for color, hex_tri_grid in zip(hex_colors, hexiamonds_tri_grid):
     if origin_x > 900:
         origin_x = 100
         origin_y = 400
-    hexiamonds.append(Hexiamond(hex_tri_grid, origin_x, origin_y))
+    hexiamonds.append(Hexiamond(color, hex_tri_grid, origin_x, origin_y))
     origin_x += 150
