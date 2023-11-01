@@ -39,12 +39,12 @@ def draw_game_screen():
     screen.fill('burlywood3')
 
     # draw grid
-    for tri in grid_to_cartesian(grid_1, (300, 50)):
+    for tri in grid_1.to_cartesian((300, 50)):
         pygame.draw.polygon(screen, 'black', tri, 3)
 
     #draw hexiamonds
     for hex in hexiamonds:
-        for tri in hex_to_cartesian(hex):
+        for tri in hex.to_cartesian():
             pygame.draw.polygon(screen, hex_colors[hex_colors_index], tri)
             pygame.draw.polygon(screen, 'black', tri, 3)
         hex_colors_index = (hex_colors_index + 1) % len(hex_colors)
@@ -75,19 +75,19 @@ while run:
                     indices = list(range(len(hexiamonds)))
                     for num in reversed(indices):
                         hex = hexiamonds[num]
-                        if point_in_hex(event.pos, hex_to_cartesian(hex)):
+                        if hex.point_in(event.pos):
                             active_hex = num
                             break
 
                 #hexiamond is rotated
                 if event.button == 3:
                     for hex in reversed(hexiamonds):
-                        if point_in_hex(event.pos, hex_to_cartesian(hex)):
-                            if hex['mirror']:
-                                hex['rotation'] = (hex['rotation'] - 1) % 6
+                        if hex.point_in(event.pos):
+                            if hex.mirror:
+                                hex.rotation = (hex.rotation - 1) % 6
                                 break
                             else:
-                                hex['rotation'] = (hex['rotation'] + 1) % 6
+                                hex.rotation = (hex.rotation + 1) % 6
                                 break
             #hexiamond is dropped
             if event.type == pygame.MOUSEBUTTONUP:
@@ -98,19 +98,19 @@ while run:
             if event.type == pygame.MOUSEMOTION:
                 if active_hex is not None:
                     dx, dy = event.rel
-                    current_origin = hexiamonds[active_hex]['origin']
+                    current_origin = hexiamonds[active_hex].origin
                     new_x = max(0, min(current_origin[0] + dx, SCREEN_WIDTH))
                     new_y = max(0, min(current_origin[1] + dy, SCREEN_HEIGHT))
-                    hexiamonds[active_hex]['origin'] = (new_x, new_y)
+                    hexiamonds[active_hex].origin = (new_x, new_y)
 
             #hexiamond is mirrored
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 if active_hex is not None:
-                    hexiamonds[active_hex]['mirror'] = not hexiamonds[active_hex]['mirror']
+                    hexiamonds[active_hex].mirror = not hexiamonds[active_hex].mirror
                 else:
                     for hex in reversed(hexiamonds):
-                        if point_in_hex(pygame.mouse.get_pos(), hex_to_cartesian(hex)):
-                            hex['mirror'] = not hex['mirror']
+                        if hex.point_in(pygame.mouse.get_pos()):
+                            hex.mirror = not hex.mirror
                             break
 
     if current_screen == 'start':

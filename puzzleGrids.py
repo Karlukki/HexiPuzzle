@@ -1,10 +1,26 @@
 '''Puzzle grid generation and helper functions'''
 from grids.src.updown_tri import *
 
-grid_1_simple = [
+grids_simple = [
+    [
     (0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
     (0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0)
     ]
+]
+
+class PuzzleGrid:
+    def __init__(self, grid_simple):
+        self.triangles = convert_grid(grid_simple)
+        self.fill = None
+
+    def to_cartesian(self, origin):
+        grid_coordinates = []
+        for tri in self.triangles:
+            triangle = (tri_corners(tri[0], tri[1], tri[2]))
+            triangle = (tuple((origin[0] + x, origin[1] - y) for x, y in triangle))  # positioning
+            grid_coordinates.append(triangle)
+        return grid_coordinates
+
 
 # returns triangle on the right of given
 def moveRight(a, b, c):
@@ -22,7 +38,7 @@ def moveDown(a, b, c):
 
 
 # converts grid in simple representation to tri_grid representation
-def convert_grid (grid_simple):
+def convert_grid(grid_simple):
     grid = set()
     first_of_row = (1, 0, 1)
     current_tri = first_of_row
@@ -35,13 +51,7 @@ def convert_grid (grid_simple):
         current_tri = first_of_row
     return grid
 
-def grid_to_cartesian(grid, origin):
-    grid_coords = []
-    for tri in grid:
-        triangle = (tri_corners(tri[0], tri[1], tri[2]))
-        triangle = (tuple((origin[0] + x, origin[1] - y) for x, y in triangle)) #positioning
-        grid_coords.append(triangle)
-    return grid_coords
 
-grid_1 = convert_grid(grid_1_simple)
-# print(grid_1)
+
+grid_1 = PuzzleGrid(grids_simple[0])
+# print(grid_1.triangles)
