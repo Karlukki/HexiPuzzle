@@ -3,9 +3,9 @@
 3. ~~Rotate pieces with right click~~
 4. ~~Mirror pieces with spacebar~~
 5. ~~Make grid~~
-6. Snapping to grid and recognize taken cells
+6. ~~Snapping to grid and recognize taken cells~~
 
 ---
 
-7. Add multiple levels
+7. Add multiple level functionality 
 8. Do mathematical calculations

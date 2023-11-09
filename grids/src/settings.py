@@ -1,2 +1,2 @@
 # This is the side length of the triangle/hex
-edge_length = 50
+edge_length = 45
