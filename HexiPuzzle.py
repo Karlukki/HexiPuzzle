@@ -3,6 +3,7 @@ import pygame
 import tkinter as tk
 from hexiamonds import *
 from puzzleGrids import *
+import random
 
 pygame.init()
 
@@ -15,13 +16,21 @@ pygame.display.set_caption('HexiPuzzle')
 
 
 loading_progress = 0
+
+selected_level = "Easy"
+
+grid_1 = None
+
+
 def draw_loading_line():
     pygame.draw.line(screen, 'black', (0, 0), (loading_progress, 0), 5)
 
-def draw_start_screen():
+
+
+def draw_start_screen(selected_level="Easy"):
     screen.fill('burlywood3')
 
-    #create and draw start button
+    # Create and draw start button
     start_button_rect = pygame.Rect(400, 300, 200, 50)
     pygame.draw.rect(screen, 'orange', start_button_rect)
     font = pygame.font.Font(None, 36)
@@ -29,11 +38,36 @@ def draw_start_screen():
     text_rect = text.get_rect(center=start_button_rect.center)
     screen.blit(text, text_rect)
 
+    # Return the level buttons from draw_levels
+    return draw_levels(selected_level, font)
+
+
 clock = pygame.time.Clock()
 active_hex = None
 
+def draw_levels(selected_level, font=None):
+    # Create and draw level buttons in a row
+    levels = ["Easy", "Medium", "Hard"]
+    level_buttons = []
+    button_width, button_height = 150, 50
+    gap = 20  # Gap between level buttons
+    total_width = len(levels) * (button_width + gap) - gap  # Total width of level buttons
+
+    for i, level in enumerate(levels):
+        level_button_rect = pygame.Rect((800 - total_width) // 1.2 + i * (button_width + gap), 400, button_width,
+                                        button_height)
+        color = 'chartreuse' if level == selected_level else 'azure2'
+        pygame.draw.rect(screen, color, level_button_rect)
+        level_text = font.render(level, True, 'black')
+        level_text_rect = level_text.get_rect(center=level_button_rect.center)
+        screen.blit(level_text, level_text_rect)
+        level_buttons.append((level, level_button_rect))
+
+    return level_buttons
+
 def draw_game_screen():
     screen.fill('burlywood3')
+
 
     # draw grid
     for tri in grid_1.corners:
@@ -60,17 +94,39 @@ while run:
         if event.type == pygame.QUIT:
             run = False
 
+        grid_easy = PuzzleGrid(grids_easy[random.randint(0, len(grids_easy) - 1)], (300, 30))
         if current_screen == 'start':
+            if selected_level == "Easy":
+                grid_1 = grid_easy
+            elif selected_level == "Medium":
+                grid_1 = grid_medium
+            elif selected_level == "Hard":
+                grid_1 = grid_hard
             #start button clicked
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 start_button_rect = pygame.Rect(400, 300, 200, 50)
                 if start_button_rect.collidepoint(event.pos):
                     current_screen = 'loading'
+                    grid_easy = PuzzleGrid(grids_easy[random.randint(0, len(grids_easy) - 1)], (300, 30))
+                    grid_medium = PuzzleGrid(grids_medium[random.randint(0, len(grids_medium) - 1)], (300, 30))
+                    grid_hard = PuzzleGrid(grids_hard[random.randint(0, len(grids_hard) - 1)], (300, 30))
 
-
+                for level, button_rect in draw_start_screen(selected_level):
+                    if button_rect.collidepoint(event.pos):
+                        selected_level = level
+                        grid_easy = PuzzleGrid(grids_easy[random.randint(0, len(grids_easy) - 1)], (300, 30))
+                        grid_medium = PuzzleGrid(grids_medium[random.randint(0, len(grids_medium) - 1)], (300, 30))
+                        grid_hard = PuzzleGrid(grids_hard[random.randint(0, len(grids_hard) - 1)], (300, 30))
+                        current_screen = 'start'
+                        draw_start_screen(selected_level)
         elif current_screen == 'game':
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if back_button_rect.collidepoint(mouse_pos):
+                    # Add functionality to go back to the previous page
+                    current_screen = 'start'
+                    draw_start_screen(selected_level)
                 #hexiamond picked up with cursor
                 if event.button == 1:
                     for hex in reversed(hexiamonds):
@@ -121,7 +177,11 @@ while run:
                             break
 
     if current_screen == 'start':
-        draw_start_screen()
+        draw_start_screen(selected_level)
+        # font = pygame.font.Font(None, 36)
+        # draw_levels(selected_level, font)
+
+
     if current_screen == 'loading':
         draw_loading_line()
         loading_progress += 2
@@ -129,6 +189,20 @@ while run:
             current_screen = 'game'
     elif current_screen == 'game':
         draw_game_screen()
+
+        level_font = pygame.font.Font(None, 36)
+        level_text = level_font.render(f'Selected level: {selected_level}', True, 'black')  # Use level_font here
+        screen.blit(level_text, (20, 20))
+
+        white = (255, 255, 255)
+        black = (0, 0, 0)
+
+        # Font for the back button
+        font = pygame.font.Font(pygame.font.get_default_font(), 36)
+        back_button_rect = pygame.Rect(60, 60, 100, 40)
+        pygame.draw.rect(screen, white, back_button_rect)  # Draw the back button background
+        back_button_text = font.render("Back", True, black)  # Define back_button_text here
+        screen.blit(back_button_text, (60, 60))
 
         fps = clock.get_fps()
         font = pygame.font.Font(None, 36)
