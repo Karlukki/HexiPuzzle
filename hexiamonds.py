@@ -132,14 +132,18 @@ class Hexiamond:
 def distance(point1, point2):
     return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 
+# hexiamonds = []
+# def generate_hexiamonds():
+    # generates a list of all hexiamonds
+    # global hexiamonds
 
-# generates a list of all hexiamonds
-hexiamonds = []
-origin_x = 100
-origin_y = 400
-for color, hex_tri_grid in zip(hex_colors, hexiamonds_tri_grid):
-    if origin_x > 900:
-        origin_x = 100
-        origin_y = 500
-    hexiamonds.append(Hexiamond(color, hex_tri_grid, origin_x, origin_y))
-    origin_x += 150
+# hexiamonds = []
+#
+# origin_x = 100
+# origin_y = 400
+# for color, hex_tri_grid in zip(hex_colors, hexiamonds_tri_grid):
+#     if origin_x > 900:
+#         origin_x = 100
+#         origin_y = 500
+#     hexiamonds.append(Hexiamond(color, hex_tri_grid, origin_x, origin_y))
+#     origin_x += 150

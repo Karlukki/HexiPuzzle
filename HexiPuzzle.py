@@ -106,7 +106,21 @@ while run:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 start_button_rect = pygame.Rect(400, 300, 200, 50)
                 if start_button_rect.collidepoint(event.pos):
+                    loading_progress = 0
                     current_screen = 'loading'
+                    # generate_hexiamonds()
+
+                    hexiamonds = []
+
+                    origin_x = 100
+                    origin_y = 400
+                    for color, hex_tri_grid in zip(hex_colors, hexiamonds_tri_grid):
+                        if origin_x > 900:
+                            origin_x = 100
+                            origin_y = 500
+                        hexiamonds.append(Hexiamond(color, hex_tri_grid, origin_x, origin_y))
+                        origin_x += 150
+
                     grid_easy = PuzzleGrid(grids_easy[random.randint(0, len(grids_easy) - 1)], (300, 30))
                     grid_medium = PuzzleGrid(grids_medium[random.randint(0, len(grids_medium) - 1)], (300, 30))
                     grid_hard = PuzzleGrid(grids_hard[random.randint(0, len(grids_hard) - 1)], (300, 30))
