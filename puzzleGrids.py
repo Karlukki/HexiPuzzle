@@ -2,18 +2,19 @@
 from grids.src.updown_tri import *
 import random
 
-grids_simple = [
-        (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
-        (0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0),
-        (0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-        (0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0),
-        (0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0),
-        (0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-        (0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0),
-        (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
-    ]
+# grids_simple = [
+#         (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
+#         (0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0),
+#         (0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+#         (0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0),
+#         (0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0),
+#         (0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+#         (0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0),
+#         (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
+#     ]
 
-grids_easy = [
+grids_simple = dict()
+grids_simple['easy'] = [
     [
         (1, 1, 1, 1, 1, 1, 1, 1, 1),
         (1, 1, 1, 1, 1, 1, 1, 1, 1),
@@ -23,14 +24,14 @@ grids_easy = [
         (0, 1, 1, 1, 1, 1, 1, 1, 1, 1)
     ],
 ]
-grids_medium = [
+grids_simple['medium'] = [
     [
         (0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
         (0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
         (0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
     ]
 ]
-grids_hard = [
+grids_simple['hard'] = [
     [
         (0,0,0,0,0,0,1,0,0,0,0,0),
         (0,0,0,0,0,1,1,1,0,0,0,0),
@@ -51,17 +52,7 @@ grids_hard = [
         (0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0),
         (0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0),
     ]
-
 ]
-
-# current_grid = None
-#
-# if selected_level == "Easy":
-#     current_grid = random.choice(grids_easy)
-# elif selected_level == "Medium":
-#     current_grid = random.choice(grids_medium)
-# elif selected_level == "Hard":
-#     current_grid = random.choice(grids_hard)
 
 
 class PuzzleGrid:
@@ -151,6 +142,13 @@ def convert_grid(grid_simple):
         first_of_row = moveDown(first_of_row[0], first_of_row[1], first_of_row[2])
         current_tri = first_of_row
     return grid
+
+
+
+game_grids = {key: [PuzzleGrid(grid, (300, 30)) for grid in value] for key, value in grids_simple.items()}
+
+
+select_grids = {key: [PuzzleGrid(grid, (300, 30)) for grid in value] for key, value in grids_simple.items()}
 
 
 # grid_0 = PuzzleGrid(grids_simple, (300, 30))

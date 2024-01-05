@@ -7,5 +7,8 @@
 
 ---
 
-7. Add multiple level functionality 
-8. Do mathematical calculations
+- Level select by category: difficulty (easy, medium, hard) or number of pieces.
+- Preview of the grids on level select.
+- Player progress is saved on every grid.
+- Hint: rotate all pieces for possible solution.
+- Hint: preplace 1/3 of all pieces.
