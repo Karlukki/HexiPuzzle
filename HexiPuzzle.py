@@ -4,6 +4,7 @@ import tkinter as tk
 from hexiamonds import *
 from puzzleGrids import *
 import random
+import json
 
 pygame.init()
 
@@ -21,6 +22,11 @@ difficulty_buttons = list()
 game_grid = None
 active_hex = None
 clock = pygame.time.Clock()
+
+# with open('progressdata.txt', 'r') as file:
+#     progressdata = json.load(file)
+#     print(progressdata)
+
 
 
 def make_diff_buttons():
@@ -77,7 +83,12 @@ def draw_start_screen():
 def draw_grid_select():
     screen.fill('burlywood3')
     for grid in select_grids[selected_difficulty]:
+
         for tri in grid.corners:
+            # if str(ggrid.simple) in progressdata and str(ggrid.corners) in progressdata[str(grid.simple)]['corners']:
+            #     print('bla')
+            #     color = progressdata[str(grid.simple)]['corners'][str(ggrid.corners)]
+            #     pygame.draw.polygon(screen, color, tri)
             if grid.point_in(pygame.mouse.get_pos()):
                 pygame.draw.polygon(screen, 'white', tri, 2)
             else:
@@ -112,7 +123,6 @@ while run:
         if event.type == pygame.QUIT:
             run = False
 
-        # grid_easy = PuzzleGrid(grids_easy[random.randint(0, len(grids_easy) - 1)], (300, 30))
         if current_screen == 'start':
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -126,22 +136,6 @@ while run:
                 start_button_rect = pygame.Rect(400, 300, 200, 50)
                 if start_button_rect.collidepoint(event.pos):
                     current_screen = 'grid_select'
-            #         # generate_hexiamonds()
-            #
-            #         hexiamonds = []
-            #
-            #         origin_x = 100
-            #         origin_y = 400
-            #         for color, hex_tri_grid in zip(hex_colors, hexiamonds_tri_grid):
-            #             if origin_x > 900:
-            #                 origin_x = 100
-            #                 origin_y = 500
-            #             hexiamonds.append(Hexiamond(color, hex_tri_grid, origin_x, origin_y))
-            #             origin_x += 150
-
-                    # grid_easy = PuzzleGrid(grids_easy[random.randint(0, len(grids_easy) - 1)], (300, 30))
-                    # grid_medium = PuzzleGrid(grids_medium[random.randint(0, len(grids_medium) - 1)], (300, 30))
-                    # grid_hard = PuzzleGrid(grids_hard[random.randint(0, len(grids_hard) - 1)], (300, 30))
 
         elif current_screen == 'grid_select':
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -152,6 +146,17 @@ while run:
                 for grid in select_grids[selected_difficulty]:
                     if grid.point_in(event.pos):
                         game_grid = PuzzleGrid(grid.simple, (300, 30))
+
+                        with open('progressdata.txt', 'r') as file:
+                            progressdata = json.load(file)
+                            for hex in hexiamonds:
+                                if str(game_grid.simple) in progressdata and hex.color in progressdata[str(game_grid.simple)]:
+                                    hex.origin = tuple(progressdata[str(game_grid.simple)][hex.color]['origin'])
+                                    hex.rotation = progressdata[str(game_grid.simple)][hex.color]['rotation']
+                                else:
+                                    hex.reset_origin()
+                                    hex.rotation = 0
+
                         [hex.snap(game_grid) for hex in hexiamonds]
                         current_screen = 'game'
 
@@ -159,6 +164,9 @@ while run:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     if back_button_rect.collidepoint(event.pos):
+                        with open('progressdata.txt', 'w') as file:
+                            progressdata[str(game_grid.simple)] = {hex.color: {'origin': hex.origin, 'rotation': hex.rotation} for hex in hexiamonds if hex.is_snapped_to(game_grid)}
+                            json.dump(progressdata, file)
                         # Add functionality to go back to the previous page
                         current_screen = 'grid_select'
 

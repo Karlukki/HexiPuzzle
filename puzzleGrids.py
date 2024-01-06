@@ -100,6 +100,8 @@ class PuzzleGrid:
     def free_cells(self):
         return {key for key, value in self.corners.items() if value is None}
 
+
+
 # checks if point is in given cell (corners given)
 def point_in_cell(cell, pt):
     def sign(p1, p2, p3):  # pseidoskalarais reizinajums

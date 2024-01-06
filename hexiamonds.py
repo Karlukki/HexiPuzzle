@@ -29,6 +29,7 @@ hexiamonds_tri_grid = [
 class Hexiamond:
     def __init__(self, color, hex_tri_grid, origin_x, origin_y):
         self.color = color
+        self.initial_origin = tuple((origin_x, origin_y))
         self.triangles = hex_tri_grid
         self.origin = tuple((origin_x, origin_y))
         self.rotation = 0
@@ -122,11 +123,19 @@ class Hexiamond:
                 pygame.event.set_allowed(pygame.MOUSEBUTTONDOWN)
                 pygame.event.set_allowed(pygame.KEYDOWN)
 
+    def is_snapped_to(self, grid):
+        for key, value in grid.corners.items():
+            if value == self.color:
+                return True
+        return False
 
     def remove_from_grid(self, grid):
         for key, value in grid.corners.items():
             if value == self.color:
                 grid.corners[key] = None
+
+    def reset_origin(self):
+        self.origin = self.initial_origin
 
 
 def distance(point1, point2):
