@@ -19,13 +19,15 @@
 # To find the neighbours of a down triangle, add 1 to a co-ordinate, and subtract one for neighbours of an up triangle.
 
 from math import floor, ceil, sqrt
-from .settings import edge_length
+# from .settings import edge_length
 from .common import mod
 
 sqrt3 = sqrt(3)
 
 # Basics #######################################################################
 
+
+edge_length = 45
 def tri_center(a, b, c):
     """Returns the center of a given triangle in cartesian co-ordinates"""
     # Each unit of a, b, c moves you in the direction of one of the edges of a

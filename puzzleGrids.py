@@ -1,5 +1,6 @@
 '''Puzzle grid generation and helper functions'''
 from grids.src.updown_tri import *
+import grids.src.updown_tri as updown_tri
 import random
 
 # grids_simple = [
@@ -58,6 +59,7 @@ grids_simple['hard'] = [
 class PuzzleGrid:
     def __init__(self, grid_simple, origin):
         self.origin = origin
+        self.simple = grid_simple
         self.triangles = convert_grid(grid_simple)
         self.corners = self.get_corners()
         self.crosspoints = self.get_crosspoints()
@@ -66,7 +68,7 @@ class PuzzleGrid:
         origin = self.origin
         grid_coordinates = dict()
         for tri in self.triangles:
-            corners = (tri_corners(tri[0], tri[1], tri[2]))
+            corners = (updown_tri.tri_corners(tri[0], tri[1], tri[2]))
             corners = (tuple((origin[0] + x, origin[1] - y) for x, y in corners))  # positioning
             grid_coordinates[corners] = None
         return grid_coordinates
@@ -116,14 +118,14 @@ def point_in_cell(cell, pt):
 
 # returns triangle on the right of given
 def moveRight(a, b, c):
-    if points_up(a, b, c):
+    if updown_tri.points_up(a, b, c):
         return (a, b, c - 1)
     else:
         return (a + 1, b, c)
 
 # returns triangle below given
 def moveDown(a, b, c):
-    if points_up(a, b, c):
+    if updown_tri.points_up(a, b, c):
         return (a, b - 1, c)
     else:
         return (a + 1, b - 1, c + 1)
@@ -144,12 +146,17 @@ def convert_grid(grid_simple):
     return grid
 
 
+# game_grids = {key: [PuzzleGrid(grid, (300, 30)) for grid in value] for key, value in grids_simple.items()}
 
-game_grids = {key: [PuzzleGrid(grid, (300, 30)) for grid in value] for key, value in grids_simple.items()}
+updown_tri.edge_length = 30
+x_left = 100
+x_right = 900
+width = 200
 
+select_grids = {}
+for key, value in grids_simple.items():
+    gap = (x_right - x_left - width*len(value)) / (len(value)+1)
+    select_grids[key] = [PuzzleGrid(grid, (x_left + (i+1)*gap + i*width, 250)) for i, grid in enumerate(value)]
 
-select_grids = {key: [PuzzleGrid(grid, (300, 30)) for grid in value] for key, value in grids_simple.items()}
-
-
-# grid_0 = PuzzleGrid(grids_simple, (300, 30))
+updown_tri.edge_length = 45
 
