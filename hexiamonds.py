@@ -5,7 +5,7 @@ import pygame
 from puzzleGrids import *
 from tkinter import messagebox
 
-message_thread = None
+
 
 hex_colors = ['deeppink', 'darkgoldenrod1', 'purple', 'cyan2', 'darkgreen', 'yellow', 'cornflowerblue',
               'darkorange1', 'lime', 'bisque', 'darkolivegreen4', 'indianred1']
@@ -96,26 +96,26 @@ class Hexiamond:
                 closest = point
 
         # if the hexiamond were moved to closest crosspoint, would it fit?
-        free_cells = grid.free_cells()
-        cells_with_centers_inside = set()
+        free_tris = grid.free_tris()
+        tris_with_centers_inside = list()
 
         for center in self.get_centers(closest):
             inside_cell = False
-            for cell in free_cells:
-                if point_in_cell(cell, center):
+            for tri in free_tris:
+                if point_in_tri(tri, center):
                     inside_cell = True
-                    cells_with_centers_inside.add(cell)
+                    tris_with_centers_inside.append(tri)
                     break
             if not inside_cell: #snapping not possible
                 return None
 
-        return closest, cells_with_centers_inside
+        return closest, tris_with_centers_inside
     def snap(self, grid):
         if self.can_snap(grid):
             self.origin = self.can_snap(grid)[0]
-            for cell in self.can_snap(grid)[1]:
-                grid.corners[cell] = self.color
-            if grid.free_cells() == set():
+            for tri in self.can_snap(grid)[1]:
+                tri['color'] = self.color
+            if grid.free_tris() == list():
                 # Display congrats
                 pygame.event.set_blocked(pygame.MOUSEBUTTONDOWN)
                 pygame.event.set_blocked(pygame.KEYDOWN)
@@ -124,27 +124,24 @@ class Hexiamond:
                 pygame.event.set_allowed(pygame.KEYDOWN)
 
     def is_snapped_to(self, grid):
-        for key, value in grid.corners.items():
-            if value == self.color:
+        for tri in grid.triangles:
+            if tri['color'] == self.color:
                 return True
         return False
 
     def remove_from_grid(self, grid):
-        for key, value in grid.corners.items():
-            if value == self.color:
-                grid.corners[key] = None
+        for tri in grid.triangles:
+            if tri['color'] == self.color:
+                tri['color'] = None
 
-    def reset_origin(self):
+    def reset_location(self):
         self.origin = self.initial_origin
+        self.rotation = 0
 
 
 def distance(point1, point2):
     return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 
-# hexiamonds = []
-# def generate_hexiamonds():
-#     generates a list of all hexiamonds
-#     global hexiamonds
 
 hexiamonds = []
 

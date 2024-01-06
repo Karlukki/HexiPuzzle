@@ -23,24 +23,18 @@ game_grid = None
 active_hex = None
 clock = pygame.time.Clock()
 
-# with open('progressdata.txt', 'r') as file:
-#     progressdata = json.load(file)
-#     print(progressdata)
-
-
 
 def make_diff_buttons():
     global difficulty_buttons, selected_difficulty
     difficulty_buttons = []
 
-    difficulties = select_grids.keys()
+    difficulties = grids.keys()
     button_width, button_height = 150, 50
     gap = 20  # Gap between difficulty buttons
     total_width = len(difficulties) * (button_width + gap) - gap  # Total width of difficulty buttons
 
     for i, diff in enumerate(difficulties):
-        button_rect = pygame.Rect((800 - total_width) // 1.2 + i * (button_width + gap), 400, button_width,
-                                       button_height)
+        button_rect = pygame.Rect((800 - total_width) // 1.2 + i * (button_width + gap), 400, button_width, button_height)
         color = 'chartreuse' if diff == selected_difficulty else 'azure2'
         font = pygame.font.Font(None, 36)
         text = font.render(diff, True, 'black')
@@ -51,27 +45,32 @@ def make_diff_buttons():
 make_diff_buttons()
 
 
-# Font for the back button
 font = pygame.font.Font(pygame.font.get_default_font(), 36)
 back_button_rect = pygame.Rect(60, 60, 100, 40)
-back_button_text = font.render("Back", True, 'black')  # Define back_button_text here
+back_button_text = font.render("Back", True, 'black')
 
 def draw_back_button():
     global back_button_rect, back_button_text
-    pygame.draw.rect(screen, 'white', back_button_rect)  # Draw the back button background
+    pygame.draw.rect(screen, 'white', back_button_rect)
     screen.blit(back_button_text, (60, 60))
 
-    level_font = pygame.font.Font(None, 36)
-    level_text = level_font.render(f'Selected difficulty: {selected_difficulty}', True, 'black')  # Use level_font here
-    screen.blit(level_text, (20, 20))
+    diff_font = pygame.font.Font(None, 36)
+    diff_text = diff_font.render(f'Difficulty: {selected_difficulty}', True, 'black')
+    screen.blit(diff_text, (20, 20))
 
+
+font = pygame.font.Font(pygame.font.get_default_font(), 18)
+reset_all_button_rect = pygame.Rect(800, 20, 165, 22)
+reset_all_button_text = font.render("Reset all progress", True, 'black')
 
 def draw_start_screen():
     screen.fill('burlywood3')
+    #draw difficulty buttons
     for button in difficulty_buttons:
         pygame.draw.rect(screen, button['color'], button['button_rect'])
         screen.blit(button['text'], button['text_rect'])
 
+    #draw start button
     start_button_rect = pygame.Rect(400, 300, 200, 50)
     pygame.draw.rect(screen, 'orange', start_button_rect)
     font = pygame.font.Font(None, 36)
@@ -79,28 +78,39 @@ def draw_start_screen():
     text_rect = text.get_rect(center=start_button_rect.center)
     screen.blit(text, text_rect)
 
+    #draw reset all progress button
+    pygame.draw.rect(screen, 'white', reset_all_button_rect)
+    screen.blit(reset_all_button_text, (800, 20))
 
 def draw_grid_select():
     screen.fill('burlywood3')
-    for grid in select_grids[selected_difficulty]:
+    with open('progressdata.txt', 'r') as file:
+        progressdata = json.load(file)
+        for grid in grids[selected_difficulty]:
+            for tri in grid.triangles:
+                if str(grid.simple) in progressdata and str(tri['tri']) in progressdata[str(grid.simple)]['colors']:
+                    color = progressdata[str(grid.simple)]['colors'][str(tri['tri'])]
+                    pygame.draw.polygon(screen, color, tri['select_corners'])
+                if grid.point_in(pygame.mouse.get_pos(), 'select_corners'):
+                    pygame.draw.polygon(screen, 'white', tri['select_corners'], 2)
+                else:
+                    pygame.draw.polygon(screen, 'black', tri['select_corners'], 2)
 
-        for tri in grid.corners:
-            # if str(ggrid.simple) in progressdata and str(ggrid.corners) in progressdata[str(grid.simple)]['corners']:
-            #     print('bla')
-            #     color = progressdata[str(grid.simple)]['corners'][str(ggrid.corners)]
-            #     pygame.draw.polygon(screen, color, tri)
-            if grid.point_in(pygame.mouse.get_pos()):
-                pygame.draw.polygon(screen, 'white', tri, 2)
-            else:
-                pygame.draw.polygon(screen, 'black', tri, 2)
+
+font = pygame.font.Font(pygame.font.get_default_font(), 18)
+reset_button_rect = pygame.Rect(830, 20, 145, 22)
+reset_button_text = font.render("Reset Progress", True, 'black')
+
+clean_button_rect = pygame.Rect(730, 20, 85, 22)
+clean_button_text = font.render("Clean up", True, 'black')
+
 
 def draw_game_screen():
     screen.fill('burlywood3')
 
-
-    # draw grid
-    for tri in game_grid.corners:
-        pygame.draw.polygon(screen, 'black', tri, 2)
+    #draw game grid
+    for tri in game_grid.triangles:
+        pygame.draw.polygon(screen, 'black', tri['game_corners'], 2)
 
     #draw hexiamonds
     for hex in hexiamonds:
@@ -112,6 +122,14 @@ def draw_game_screen():
                 pygame.draw.polygon(screen, 'green', tri, 2)
             else:
                 pygame.draw.polygon(screen, 'black', tri, 2)
+
+    #draw reset buttton
+    pygame.draw.rect(screen, 'white', reset_button_rect)
+    screen.blit(reset_button_text, (830, 20))
+
+    #draw clean up buttton
+    pygame.draw.rect(screen, 'white', clean_button_rect)
+    screen.blit(clean_button_text, (730, 20))
 
 
 current_screen = 'start'
@@ -126,7 +144,7 @@ while run:
         if current_screen == 'start':
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                # difficulty button clicked
+                #difficulty button clicked
                 for button in difficulty_buttons:
                     if button['button_rect'].collidepoint(event.pos):
                         selected_difficulty = button['diff']
@@ -137,25 +155,34 @@ while run:
                 if start_button_rect.collidepoint(event.pos):
                     current_screen = 'grid_select'
 
+                #reset all progress button clicked
+                if reset_all_button_rect.collidepoint(event.pos):
+                    with open('progressdata.txt', 'w') as file:
+                        json.dump({}, file)
+                    pygame.event.set_blocked(pygame.MOUSEBUTTONDOWN)
+                    messagebox.showinfo("Success!", "All your progress has been reset!")
+                    pygame.event.set_allowed(pygame.MOUSEBUTTONDOWN)
+
+
         elif current_screen == 'grid_select':
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                #back button to start
                 if back_button_rect.collidepoint(event.pos):
-                    # Add functionality to go back to the previous page
                     current_screen = 'start'
 
-                for grid in select_grids[selected_difficulty]:
-                    if grid.point_in(event.pos):
-                        game_grid = PuzzleGrid(grid.simple, (300, 30))
+                #grid is selected
+                for grid in grids[selected_difficulty]:
+                    if grid.point_in(event.pos, 'select_corners'):
+                        game_grid = grid
 
                         with open('progressdata.txt', 'r') as file:
                             progressdata = json.load(file)
                             for hex in hexiamonds:
-                                if str(game_grid.simple) in progressdata and hex.color in progressdata[str(game_grid.simple)]:
-                                    hex.origin = tuple(progressdata[str(game_grid.simple)][hex.color]['origin'])
-                                    hex.rotation = progressdata[str(game_grid.simple)][hex.color]['rotation']
+                                if str(game_grid.simple) in progressdata and hex.color in progressdata[str(game_grid.simple)]['hexiamonds']:
+                                    hex.origin = tuple(progressdata[str(game_grid.simple)]['hexiamonds'][hex.color]['origin'])
+                                    hex.rotation = progressdata[str(game_grid.simple)]['hexiamonds'][hex.color]['rotation']
                                 else:
-                                    hex.reset_origin()
-                                    hex.rotation = 0
+                                    hex.reset_location()
 
                         [hex.snap(game_grid) for hex in hexiamonds]
                         current_screen = 'game'
@@ -163,12 +190,27 @@ while run:
         elif current_screen == 'game':
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
+                    # back button to grid select
                     if back_button_rect.collidepoint(event.pos):
                         with open('progressdata.txt', 'w') as file:
-                            progressdata[str(game_grid.simple)] = {hex.color: {'origin': hex.origin, 'rotation': hex.rotation} for hex in hexiamonds if hex.is_snapped_to(game_grid)}
+                            progressdata[str(game_grid.simple)] = {}
+                            progressdata[str(game_grid.simple)]['colors'] = {str(tri['tri']): tri['color'] for tri in game_grid.triangles if tri['color'] is not None}
+                            progressdata[str(game_grid.simple)]['hexiamonds'] = {hex.color: {'origin': hex.origin, 'rotation': hex.rotation} for hex in hexiamonds if hex.is_snapped_to(game_grid)}
                             json.dump(progressdata, file)
-                        # Add functionality to go back to the previous page
                         current_screen = 'grid_select'
+
+                    #reset progress is clicked
+                    if reset_button_rect.collidepoint(event.pos):
+                        for hex in hexiamonds:
+                            hex.remove_from_grid(game_grid)
+                            hex.reset_location()
+
+                    #clean up is clicked
+                    if clean_button_rect.collidepoint(event.pos):
+                        for hex in hexiamonds:
+                            if not hex.is_snapped_to(game_grid):
+                                hex.remove_from_grid(game_grid)
+                                hex.reset_location()
 
                     #hexiamond picked up with cursor
                     for hex in reversed(hexiamonds):
@@ -233,7 +275,7 @@ while run:
         fps = clock.get_fps()
         font = pygame.font.Font(None, 36)
         fps_text = font.render(f'FPS: {int(fps)}', True, 'black')
-        screen.blit(fps_text, (10, 10))
+        screen.blit(fps_text, (5, 575))
         clock.tick()
 
     pygame.display.flip()
