@@ -3,7 +3,6 @@ import pygame
 import tkinter as tk
 from hexiamonds import *
 from puzzleGrids import *
-import random
 import json
 
 pygame.init()
@@ -24,14 +23,24 @@ active_hex = None
 clock = pygame.time.Clock()
 
 
+def save_progress():
+    with open('progressdata.txt', 'w') as file:
+        progressdata[str(game_grid.simple)] = {}
+        progressdata[str(game_grid.simple)]['colors'] = {str(tri['tri']): tri['color'] for tri in game_grid.triangles if
+                                                         tri['color'] is not None}
+        progressdata[str(game_grid.simple)]['hexiamonds'] = {
+            hex.color: {'origin': hex.origin, 'rotation': hex.rotation, 'mirror': hex.mirror} for hex in hexiamonds if
+            hex.is_snapped_to(game_grid)}
+        json.dump(progressdata, file)
+
 def make_diff_buttons():
     global difficulty_buttons, selected_difficulty
     difficulty_buttons = []
 
     difficulties = grids.keys()
     button_width, button_height = 150, 50
-    gap = 20  # Gap between difficulty buttons
-    total_width = len(difficulties) * (button_width + gap) - gap  # Total width of difficulty buttons
+    gap = 20
+    total_width = len(difficulties) * (button_width + gap) - gap
 
     for i, diff in enumerate(difficulties):
         button_rect = pygame.Rect((800 - total_width) // 1.2 + i * (button_width + gap), 400, button_width, button_height)
@@ -91,6 +100,8 @@ def draw_grid_select():
                 if str(grid.simple) in progressdata and str(tri['tri']) in progressdata[str(grid.simple)]['colors']:
                     color = progressdata[str(grid.simple)]['colors'][str(tri['tri'])]
                     pygame.draw.polygon(screen, color, tri['select_corners'])
+                else:
+                    pygame.draw.polygon(screen, 'burlywood4', tri['select_corners'])
                 if grid.point_in(pygame.mouse.get_pos(), 'select_corners'):
                     pygame.draw.polygon(screen, 'white', tri['select_corners'], 2)
                 else:
@@ -110,6 +121,7 @@ def draw_game_screen():
 
     #draw game grid
     for tri in game_grid.triangles:
+        pygame.draw.polygon(screen, 'burlywood4', tri['game_corners'])
         pygame.draw.polygon(screen, 'black', tri['game_corners'], 2)
 
     #draw hexiamonds
@@ -157,6 +169,8 @@ while run:
 
                 #reset all progress button clicked
                 if reset_all_button_rect.collidepoint(event.pos):
+                    if game_grid:
+                        [hex.detach_from_grid(game_grid) for hex in hexiamonds]
                     with open('progressdata.txt', 'w') as file:
                         json.dump({}, file)
                     pygame.event.set_blocked(pygame.MOUSEBUTTONDOWN)
@@ -181,10 +195,11 @@ while run:
                                 if str(game_grid.simple) in progressdata and hex.color in progressdata[str(game_grid.simple)]['hexiamonds']:
                                     hex.origin = tuple(progressdata[str(game_grid.simple)]['hexiamonds'][hex.color]['origin'])
                                     hex.rotation = progressdata[str(game_grid.simple)]['hexiamonds'][hex.color]['rotation']
+                                    hex.mirror = progressdata[str(game_grid.simple)]['hexiamonds'][hex.color]['mirror']
                                 else:
                                     hex.reset_location()
 
-                        [hex.snap(game_grid) for hex in hexiamonds]
+                        [hex.snap(game_grid, False) for hex in hexiamonds]
                         current_screen = 'game'
 
         elif current_screen == 'game':
@@ -192,24 +207,20 @@ while run:
                 if event.button == 1:
                     # back button to grid select
                     if back_button_rect.collidepoint(event.pos):
-                        with open('progressdata.txt', 'w') as file:
-                            progressdata[str(game_grid.simple)] = {}
-                            progressdata[str(game_grid.simple)]['colors'] = {str(tri['tri']): tri['color'] for tri in game_grid.triangles if tri['color'] is not None}
-                            progressdata[str(game_grid.simple)]['hexiamonds'] = {hex.color: {'origin': hex.origin, 'rotation': hex.rotation} for hex in hexiamonds if hex.is_snapped_to(game_grid)}
-                            json.dump(progressdata, file)
+                        save_progress()
                         current_screen = 'grid_select'
 
                     #reset progress is clicked
                     if reset_button_rect.collidepoint(event.pos):
                         for hex in hexiamonds:
-                            hex.remove_from_grid(game_grid)
+                            hex.detach_from_grid(game_grid)
                             hex.reset_location()
 
                     #clean up is clicked
                     if clean_button_rect.collidepoint(event.pos):
                         for hex in hexiamonds:
                             if not hex.is_snapped_to(game_grid):
-                                hex.remove_from_grid(game_grid)
+                                hex.detach_from_grid(game_grid)
                                 hex.reset_location()
 
                     #hexiamond picked up with cursor
@@ -218,7 +229,7 @@ while run:
                             active_hex = hex
                             hexiamonds.remove(active_hex)
                             hexiamonds.append(active_hex) #move to top
-                            hex.remove_from_grid(game_grid)
+                            hex.detach_from_grid(game_grid)
                             [hex.snap(game_grid) for hex in hexiamonds if hex != active_hex]
                             break
 
@@ -230,7 +241,7 @@ while run:
                                 hex.rotation = (hex.rotation - 1) % 6
                             else:
                                 hex.rotation = (hex.rotation + 1) % 6
-                            hex.remove_from_grid(game_grid)
+                            hex.detach_from_grid(game_grid)
                             hex.snap(game_grid)
                             break
             #hexiamond is dropped
@@ -257,7 +268,7 @@ while run:
                     for hex in reversed(hexiamonds):
                         if hex.point_in(pygame.mouse.get_pos()):
                             hex.mirror = not hex.mirror
-                            hex.remove_from_grid(game_grid)
+                            hex.detach_from_grid(game_grid)
                             hex.snap(game_grid)
                             break
 
@@ -281,4 +292,6 @@ while run:
     pygame.display.flip()
 
 
+if current_screen == 'game':
+    save_progress()
 pygame.quit()

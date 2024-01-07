@@ -1,9 +1,9 @@
 '''Hexiamond generation, transformations and helper functions '''
-import threading
 import math
 import pygame
 from puzzleGrids import *
 from tkinter import messagebox
+from grids.src.updown_tri import *
 
 
 
@@ -27,6 +27,7 @@ hexiamonds_tri_grid = [
     {(0, 1, 0), (1, 1, 0), (1, 1, -1), (1, 0, 1), (1, 0, 0), (2, 0, 0)},#X
 ]
 class Hexiamond:
+    '''Data structure and methods for hexiamonds(puzzle pieces)'''
     def __init__(self, color, hex_tri_grid, origin_x, origin_y):
         self.color = color
         self.initial_origin = tuple((origin_x, origin_y))
@@ -36,8 +37,8 @@ class Hexiamond:
         self.mirror = False
 
 
-    # Hexiamond transformations and conversion to cartesian coordinates
     def get_corners(self):
+        '''Hexiamond transformations and conversion to cartesian coordinates'''
         origin = self.origin
         rotation = self.rotation
         mirror = self.mirror
@@ -51,8 +52,8 @@ class Hexiamond:
         return hexiamond_coordinates
 
 
-    # returns set of triangle center coordinates if the hexiamond were located at given origin
     def get_centers(self, origin=None):
+        '''Returns set of triangle center coordinates if the hexiamond were located at given origin'''
         if origin is None:
             origin = self.origin
         rotation = self.rotation
@@ -67,8 +68,8 @@ class Hexiamond:
         return hexiamond_coordinates
 
 
-    # Function checks if a point is inside self
     def point_in(self, pt):
+        '''Returns if a point is inside self'''
         def sign(p1, p2, p3):  # pseidoskalarais reizinajums
             return (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1])
         for tri in self.get_corners():
@@ -82,10 +83,9 @@ class Hexiamond:
                 return True
         return False
 
-# if hexiamond can snap returns the point and the cells that would be filled
-# else returns None
-    def can_snap(self, grid):
 
+    def can_snap(self, grid):
+        '''If hexiamond can snap to grid, returns the point and the tris that would be filled, else returns None'''
         # gets the closest crosspoint
         closest = None
         min_distance = float('inf')
@@ -110,12 +110,13 @@ class Hexiamond:
                 return None
 
         return closest, tris_with_centers_inside
-    def snap(self, grid):
+    def snap(self, grid, message = True):
+        '''Snaps (attaches) hexiamond to grid'''
         if self.can_snap(grid):
             self.origin = self.can_snap(grid)[0]
             for tri in self.can_snap(grid)[1]:
                 tri['color'] = self.color
-            if grid.free_tris() == list():
+            if message and grid.free_tris() == list():
                 # Display congrats
                 pygame.event.set_blocked(pygame.MOUSEBUTTONDOWN)
                 pygame.event.set_blocked(pygame.KEYDOWN)
@@ -124,25 +125,30 @@ class Hexiamond:
                 pygame.event.set_allowed(pygame.KEYDOWN)
 
     def is_snapped_to(self, grid):
+        '''Returns if hexiamond is snapped (attached) to grid'''
         for tri in grid.triangles:
             if tri['color'] == self.color:
                 return True
         return False
 
-    def remove_from_grid(self, grid):
+    def detach_from_grid(self, grid):
+        '''Detaches hexiamond from grid'''
         for tri in grid.triangles:
             if tri['color'] == self.color:
                 tri['color'] = None
 
     def reset_location(self):
+        '''Resets origin and rotation of hexiamond to initial values'''
         self.origin = self.initial_origin
         self.rotation = 0
 
 
 def distance(point1, point2):
+    '''Returns distance between 2 points'''
     return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 
 
+#generates list of hexiamonds
 hexiamonds = []
 
 origin_x = 100
