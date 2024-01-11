@@ -34,10 +34,15 @@ read_progress()
 
 def save_progress():
     with open('progressdata.txt', 'w') as file:
-        progressdata[str(game_grid.simple)] = {}
-        progressdata[str(game_grid.simple)]['colors'] = {str(tri['tri']): tri['color'] for tri in game_grid.triangles if tri['color'] is not None}
-        progressdata[str(game_grid.simple)]['hexiamonds'] = {
-            hex.color: {'origin': hex.origin, 'rotation': hex.rotation, 'mirror': hex.mirror} for hex in hexiamonds if hex.is_snapped_to(game_grid)}
+        if all(value['color'] is None for value in game_grid.triangles):
+            if str(game_grid.simple) in progressdata:
+                del progressdata[str(game_grid.simple)]
+        else:
+            progressdata[str(game_grid.simple)] = {}
+            progressdata[str(game_grid.simple)]['colors'] = {str(tri['tri']): tri['color'] for tri in game_grid.triangles if tri['color'] is not None}
+            progressdata[str(game_grid.simple)]['hexiamonds'] = {
+                hex.color: {'origin': hex.origin, 'rotation': hex.rotation, 'mirror': hex.mirror}
+                for hex in hexiamonds if hex.is_snapped_to(game_grid)}
         json.dump(progressdata, file)
 
 def make_diff_buttons():
