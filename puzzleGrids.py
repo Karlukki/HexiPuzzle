@@ -2,17 +2,6 @@
 import grids.src.updown_tri as updown_tri
 
 
-# grids_simple = [
-#         (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
-#         (0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0),
-#         (0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-#         (0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0),
-#         (0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0),
-#         (0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-#         (0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0),
-#         (0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0),
-#     ]
-
 grids_simple = dict()
 grids_simple['easy'] = [
     [
@@ -180,7 +169,6 @@ def point_in_tri(tri, pt):
     return False
 
 
-
 def moveRight(a, b, c):
     '''Returns triangle (tri_grid representation) on the right of given'''
     if updown_tri.points_up(a, b, c):
@@ -196,7 +184,6 @@ def moveDown(a, b, c):
         return (a + 1, b - 1, c + 1)
 
 
-#
 def convert_grid(grid_simple):
     '''Converts simple grid representation to tri_grid representation'''
     grid = set()
