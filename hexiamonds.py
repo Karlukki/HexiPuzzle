@@ -4,7 +4,7 @@ import pygame
 from puzzleGrids import *
 from tkinter import messagebox
 from grids.src.updown_tri import *
-
+import threading
 
 
 hex_colors = ['deeppink', 'darkgoldenrod1', 'purple', 'cyan2', 'darkgreen', 'yellow', 'cornflowerblue',
@@ -118,11 +118,9 @@ class Hexiamond:
                 tri['color'] = self.color
             if message and grid.free_tris() == list():
                 # Display congrats
-                pygame.event.set_blocked(pygame.MOUSEBUTTONDOWN)
-                pygame.event.set_blocked(pygame.KEYDOWN)
-                messagebox.showinfo("Congratulations!", "You solved the puzzle!")
-                pygame.event.set_allowed(pygame.MOUSEBUTTONDOWN)
-                pygame.event.set_allowed(pygame.KEYDOWN)
+                message_thread = threading.Thread(target=lambda: messagebox.showinfo("Congratulations!", "You solved the puzzle!"))
+                message_thread.start()
+
 
     def is_snapped_to(self, grid):
         '''Returns if hexiamond is snapped (attached) to grid'''

@@ -4,6 +4,7 @@ import tkinter as tk
 from hexiamonds import *
 from puzzleGrids import *
 import json
+import threading
 
 pygame.init()
 
@@ -22,15 +23,26 @@ game_grid = None
 active_hex = None
 clock = pygame.time.Clock()
 
+progressdata = {}
+def read_progress():
+    global progressdata
+    with open('progressdata.txt', 'r') as file:
+        progressdata = json.load(file)
+
+
+read_progress()
 
 def save_progress():
     with open('progressdata.txt', 'w') as file:
-        progressdata[str(game_grid.simple)] = {}
-        progressdata[str(game_grid.simple)]['colors'] = {str(tri['tri']): tri['color'] for tri in game_grid.triangles if
-                                                         tri['color'] is not None}
-        progressdata[str(game_grid.simple)]['hexiamonds'] = {
-            hex.color: {'origin': hex.origin, 'rotation': hex.rotation, 'mirror': hex.mirror} for hex in hexiamonds if
-            hex.is_snapped_to(game_grid)}
+        if all(value['color'] is None for value in game_grid.triangles):
+            if str(game_grid.simple) in progressdata:
+                del progressdata[str(game_grid.simple)]
+        else:
+            progressdata[str(game_grid.simple)] = {}
+            progressdata[str(game_grid.simple)]['colors'] = {str(tri['tri']): tri['color'] for tri in game_grid.triangles if tri['color'] is not None}
+            progressdata[str(game_grid.simple)]['hexiamonds'] = {
+                hex.color: {'origin': hex.origin, 'rotation': hex.rotation, 'mirror': hex.mirror}
+                for hex in hexiamonds if hex.is_snapped_to(game_grid)}
         json.dump(progressdata, file)
 
 def make_diff_buttons():
@@ -44,12 +56,13 @@ def make_diff_buttons():
 
     for i, diff in enumerate(difficulties):
         button_rect = pygame.Rect((800 - total_width) // 1.2 + i * (button_width + gap), 400, button_width, button_height)
-        color = 'chartreuse' if diff == selected_difficulty else 'azure2'
+        color = 'azure2' if diff == selected_difficulty else 'burlywood4'
         font = pygame.font.Font(None, 36)
         text = font.render(diff, True, 'black')
         text_rect = text.get_rect(center=button_rect.center)
 
         difficulty_buttons.append({'diff': diff, 'color': color, 'text': text, 'button_rect': button_rect, 'text_rect': text_rect})
+
 
 make_diff_buttons()
 
@@ -61,7 +74,7 @@ back_button_text = font.render("Back", True, 'black')
 def draw_back_button():
     global back_button_rect, back_button_text
     pygame.draw.rect(screen, 'white', back_button_rect)
-    screen.blit(back_button_text, (60, 60))
+    screen.blit(back_button_text, (65, 63))
 
     diff_font = pygame.font.Font(None, 36)
     diff_text = diff_font.render(f'Difficulty: {selected_difficulty}', True, 'black')
@@ -74,10 +87,20 @@ reset_all_button_text = font.render("Reset all progress", True, 'black')
 
 def draw_start_screen():
     screen.fill('burlywood3')
-    #draw difficulty buttons
+    #draw difficulty buttons and progress indicators
     for button in difficulty_buttons:
         pygame.draw.rect(screen, button['color'], button['button_rect'])
         screen.blit(button['text'], button['text_rect'])
+
+        solved_count = 0
+        for grid in grids[button['diff']]:
+            if str(grid.simple) in progressdata and len(progressdata[str(grid.simple)]['colors']) == len(grid.triangles):
+                solved_count += 1
+        total_count = len(grids[button['diff']])
+
+        color = 'limegreen' if solved_count == total_count else 'black'
+        font = pygame.font.Font(None, 48)
+        screen.blit(font.render(str(solved_count)+'/'+str(total_count), True, color), (button['button_rect'][0]+53, 460))
 
     #draw start button
     start_button_rect = pygame.Rect(400, 300, 200, 50)
@@ -91,6 +114,7 @@ def draw_start_screen():
     pygame.draw.rect(screen, 'white', reset_all_button_rect)
     screen.blit(reset_all_button_text, (800, 20))
 
+<<<<<<< HEAD
     #draw level completion text
     completed_easy = 1  # Update this value based on the actual completion status
     completed_medium = 2
@@ -118,6 +142,8 @@ def draw_start_screen():
     screen.blit(completion_text, completion_text_rect)
 
 
+=======
+>>>>>>> fe7ff7cc066238601bf2a924a203f3582d3a7067
 
 def draw_grid_select():
     screen.fill('burlywood3')
@@ -204,6 +230,7 @@ def draw_controls():
         current_y += 60
 
 
+
 current_screen = 'start'
 
 run = True
@@ -233,15 +260,17 @@ while run:
                         [hex.detach_from_grid(game_grid) for hex in hexiamonds]
                     with open('progressdata.txt', 'w') as file:
                         json.dump({}, file)
-                    pygame.event.set_blocked(pygame.MOUSEBUTTONDOWN)
-                    messagebox.showinfo("Success!", "All your progress has been reset!")
-                    pygame.event.set_allowed(pygame.MOUSEBUTTONDOWN)
+                    read_progress()
+                    message_thread = threading.Thread(target=lambda: messagebox.showinfo("Success!", "All your progress has been reset!"))
+                    message_thread.start()
+
 
 
         elif current_screen == 'grid_select':
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 #back button to start
                 if back_button_rect.collidepoint(event.pos):
+                    read_progress()
                     current_screen = 'start'
 
                 #grid is selected
@@ -249,15 +278,14 @@ while run:
                     if grid.point_in(event.pos, 'select_corners'):
                         game_grid = grid
 
-                        with open('progressdata.txt', 'r') as file:
-                            progressdata = json.load(file)
-                            for hex in hexiamonds:
-                                if str(game_grid.simple) in progressdata and hex.color in progressdata[str(game_grid.simple)]['hexiamonds']:
-                                    hex.origin = tuple(progressdata[str(game_grid.simple)]['hexiamonds'][hex.color]['origin'])
-                                    hex.rotation = progressdata[str(game_grid.simple)]['hexiamonds'][hex.color]['rotation']
-                                    hex.mirror = progressdata[str(game_grid.simple)]['hexiamonds'][hex.color]['mirror']
-                                else:
-                                    hex.reset_location()
+                        read_progress()
+                        for hex in hexiamonds:
+                            if str(game_grid.simple) in progressdata and hex.color in progressdata[str(game_grid.simple)]['hexiamonds']:
+                                hex.origin = tuple(progressdata[str(game_grid.simple)]['hexiamonds'][hex.color]['origin'])
+                                hex.rotation = progressdata[str(game_grid.simple)]['hexiamonds'][hex.color]['rotation']
+                                hex.mirror = progressdata[str(game_grid.simple)]['hexiamonds'][hex.color]['mirror']
+                            else:
+                                hex.reset_location()
 
                         [hex.snap(game_grid, False) for hex in hexiamonds]
                         current_screen = 'game'
