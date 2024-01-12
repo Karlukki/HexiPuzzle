@@ -91,6 +91,34 @@ def draw_start_screen():
     pygame.draw.rect(screen, 'white', reset_all_button_rect)
     screen.blit(reset_all_button_text, (800, 20))
 
+    #draw level completion text
+    completed_easy = 1  # Update this value based on the actual completion status
+    completed_medium = 2
+    completed_hard = 3
+
+    text_box_rect = pygame.Rect(300, 500, 50, 10)  # Adjust the coordinates and size
+    pygame.draw.rect(screen, 'burlywood3', text_box_rect)
+    font = pygame.font.Font(None, 36)
+    completion_text = font.render(f"{completed_easy}/3", True, 'black')
+    completion_text_rect = completion_text.get_rect(center=text_box_rect.center)
+    screen.blit(completion_text, completion_text_rect)
+
+    text_box_rect = pygame.Rect(470, 500, 50, 10)  # Adjust the coordinates and size
+    pygame.draw.rect(screen, 'burlywood3', text_box_rect)
+    font = pygame.font.Font(None, 36)
+    completion_text = font.render(f"{completed_medium}/3", True, 'black')
+    completion_text_rect = completion_text.get_rect(center=text_box_rect.center)
+    screen.blit(completion_text, completion_text_rect)
+
+    text_box_rect = pygame.Rect(650, 500, 50, 10)  # Adjust the coordinates and size
+    pygame.draw.rect(screen, 'burlywood3', text_box_rect)
+    font = pygame.font.Font(None, 36)
+    completion_text = font.render(f"{completed_hard}/3", True, 'black')
+    completion_text_rect = completion_text.get_rect(center=text_box_rect.center)
+    screen.blit(completion_text, completion_text_rect)
+
+
+
 def draw_grid_select():
     screen.fill('burlywood3')
     with open('progressdata.txt', 'r') as file:
@@ -142,6 +170,38 @@ def draw_game_screen():
     #draw clean up buttton
     pygame.draw.rect(screen, 'white', clean_button_rect)
     screen.blit(clean_button_text, (730, 20))
+
+    draw_controls()
+
+def draw_controls():
+    image_width, image_height = 50, 50
+    margin = 830
+    current_y = 55
+
+    controls_info = [
+        {"image": "space.png", "purpose": 'Mirror'},
+        {"image": "lmb.png", "purpose": 'Drag'},
+        {"image": "rmb.png", "purpose": 'Rotate'},
+    ]
+
+    for control_info in controls_info:
+        image_path = control_info["image"]
+        purpose = control_info["purpose"]
+
+        try:
+            control_image = pygame.image.load(image_path)
+            control_image = pygame.transform.scale(control_image, (image_width, image_height))
+            image_rect = control_image.get_rect(topleft=(margin, current_y))
+            screen.blit(control_image, image_rect)
+        except pygame.error as e:
+            print(f"Error loading image {image_path}: {e}")
+
+        font = pygame.font.Font(None, 24)
+        text = font.render(purpose, True, 'black')
+        text_rect = text.get_rect(topleft=(margin + image_width + 10, current_y + (image_height - text.get_height()) // 2))
+        screen.blit(text, text_rect)
+
+        current_y += 60
 
 
 current_screen = 'start'
