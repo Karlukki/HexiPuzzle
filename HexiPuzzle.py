@@ -114,36 +114,9 @@ def draw_start_screen():
     pygame.draw.rect(screen, 'white', reset_all_button_rect)
     screen.blit(reset_all_button_text, (800, 20))
 
-<<<<<<< HEAD
-    #draw level completion text
-    completed_easy = 1  # Update this value based on the actual completion status
-    completed_medium = 2
-    completed_hard = 3
-
-    text_box_rect = pygame.Rect(300, 500, 50, 10)  # Adjust the coordinates and size
-    pygame.draw.rect(screen, 'burlywood3', text_box_rect)
-    font = pygame.font.Font(None, 36)
-    completion_text = font.render(f"{completed_easy}/3", True, 'black')
-    completion_text_rect = completion_text.get_rect(center=text_box_rect.center)
-    screen.blit(completion_text, completion_text_rect)
-
-    text_box_rect = pygame.Rect(470, 500, 50, 10)  # Adjust the coordinates and size
-    pygame.draw.rect(screen, 'burlywood3', text_box_rect)
-    font = pygame.font.Font(None, 36)
-    completion_text = font.render(f"{completed_medium}/3", True, 'black')
-    completion_text_rect = completion_text.get_rect(center=text_box_rect.center)
-    screen.blit(completion_text, completion_text_rect)
-
-    text_box_rect = pygame.Rect(650, 500, 50, 10)  # Adjust the coordinates and size
-    pygame.draw.rect(screen, 'burlywood3', text_box_rect)
-    font = pygame.font.Font(None, 36)
-    completion_text = font.render(f"{completed_hard}/3", True, 'black')
-    completion_text_rect = completion_text.get_rect(center=text_box_rect.center)
-    screen.blit(completion_text, completion_text_rect)
 
 
-=======
->>>>>>> fe7ff7cc066238601bf2a924a203f3582d3a7067
+
 
 def draw_grid_select():
     screen.fill('burlywood3')
